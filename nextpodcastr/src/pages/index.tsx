@@ -9,6 +9,8 @@ import Link from 'next/link';
 
 
 import { convertDurationToTimeString } from "../Utils/convertDurationToTimeString";
+import { PlayerContext } from '../context/playerContext';
+import { useContext } from 'react';
 type Episode = {
 
   id: string,
@@ -29,10 +31,12 @@ type HomeProps = {
 
 export default function Home({ lastestEpisodes, allEpisodes }: HomeProps) {
 
+  const { play } = useContext(PlayerContext)
+
   return (
     <div className={styles.homepage}>
       <section className={styles.latestEpisodes}>
-        <h2>últimos Lançamentos</h2>
+        <h2>últimos Lançamentos </h2>
         <ul>
           {lastestEpisodes.map((episode, index) => {
             return (
@@ -54,7 +58,7 @@ export default function Home({ lastestEpisodes, allEpisodes }: HomeProps) {
                   <span>{episode.dusrationAsString}</span>
                 </div>
 
-                <button type="button" >
+                <button type="button" onClick={() => play(episode)} >
                   <img src="/play-green.svg" alt="Tocar episódio" />
                 </button>
               </li>
@@ -116,11 +120,14 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const { data } = await api.get('episodes', {
     params: {
-      _limit: 12,
+      _limit: 2,
       _sort: 'published_at',
       _order: 'desc'
     }
   });
+
+
+
 
   const episodes = data.map(episode => {
     return {
