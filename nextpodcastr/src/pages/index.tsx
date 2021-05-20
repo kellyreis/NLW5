@@ -1,44 +1,48 @@
-
-import { format, parseISO } from 'date-fns';
 import { GetStaticProps } from 'next';
-import { api } from "../services/api";
-import ptBR from 'date-fns/locale/pt-BR';
-import styles from './home.module.scss';
 import Image from 'next/image';
-import Link from 'next/link';
+import Head from 'next/head';
+import Link from 'next/link'
+import { format, parseISO } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR'
 
+import { api } from '../services/api';
+import { convertDurationToTimeString } from '../utils/convertDurationToTimeString';
+import { usePlayer } from '../contexts/PlayerContext';
 
-import { convertDurationToTimeString } from "../Utils/convertDurationToTimeString";
-import { PlayerContext } from '../context/playerContext';
-import { useContext } from 'react';
+import styles from './home.module.scss';
+
 type Episode = {
-
-  id: string,
-  title: string,
-  thumbnail: string,
-  members: string,
-  publishedAt: string,
-  duration: string,
-  description: string,
-  url: string,
-  dusrationAsString: string,
+  id: string;
+  title: string;
+  thumbnail: string;
+  members: string;
+  duration: number;
+  durationAsString: string;
+  url: string;
+  publishedAt: string;
 }
 
 type HomeProps = {
-  lastestEpisodes: Episode[];
+  latestEpisodes: Episode[];
   allEpisodes: Episode[];
 }
 
-export default function Home({ lastestEpisodes, allEpisodes }: HomeProps) {
+export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
+  const { playList } = usePlayer()
 
-  const { play } = useContext(PlayerContext)
+  const episodeList = [...latestEpisodes, ...allEpisodes];
 
   return (
     <div className={styles.homepage}>
+      <Head>
+        <title>Home | Podcastr</title>
+      </Head>
+
       <section className={styles.latestEpisodes}>
-        <h2>últimos Lançamentos </h2>
+        <h2>Últimos lançamentos</h2>
+
         <ul>
-          {lastestEpisodes.map((episode, index) => {
+          {latestEpisodes.map((episode, index) => {
             return (
               <li key={episode.id}>
                 <Image
@@ -55,10 +59,10 @@ export default function Home({ lastestEpisodes, allEpisodes }: HomeProps) {
                   </Link>
                   <p>{episode.members}</p>
                   <span>{episode.publishedAt}</span>
-                  <span>{episode.dusrationAsString}</span>
+                  <span>{episode.durationAsString}</span>
                 </div>
 
-                <button type="button" onClick={() => play(episode)} >
+                <button type="button" onClick={() => playList(episodeList, index)}>
                   <img src="/play-green.svg" alt="Tocar episódio" />
                 </button>
               </li>
@@ -66,6 +70,7 @@ export default function Home({ lastestEpisodes, allEpisodes }: HomeProps) {
           })}
         </ul>
       </section>
+
       <section className={styles.allEpisodes}>
         <h2>Todos episódios</h2>
 
@@ -100,9 +105,9 @@ export default function Home({ lastestEpisodes, allEpisodes }: HomeProps) {
                   </td>
                   <td>{episode.members}</td>
                   <td style={{ width: 100 }}>{episode.publishedAt}</td>
-                  <td>{episode.dusrationAsString}</td>
+                  <td>{episode.durationAsString}</td>
                   <td>
-                    <button type="button" >
+                    <button type="button" onClick={() => playList(episodeList, index + latestEpisodes.length)}>
                       <img src="/play-green.svg" alt="Tocar episódio" />
                     </button>
                   </td>
@@ -112,49 +117,40 @@ export default function Home({ lastestEpisodes, allEpisodes }: HomeProps) {
           </tbody>
         </table>
       </section>
-    </div >
+    </div>
   )
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-
   const { data } = await api.get('episodes', {
     params: {
-      _limit: 2,
+      _limit: 12,
       _sort: 'published_at',
       _order: 'desc'
     }
-  });
-
-
-
+  })
 
   const episodes = data.map(episode => {
     return {
-
       id: episode.id,
       title: episode.title,
       thumbnail: episode.thumbnail,
       members: episode.members,
-      publishedAt: format(parseISO(episode.published_at), 'd MM yy', { locale: ptBR }),
+      publishedAt: format(parseISO(episode.published_at), 'd MMM yy', { locale: ptBR }),
       duration: Number(episode.file.duration),
-      description: episode.description,
+      durationAsString: convertDurationToTimeString(Number(episode.file.duration)),
       url: episode.file.url,
-      dusrationAsString: convertDurationToTimeString(Number(episode.file.duration))
-
     };
   })
 
-
-  const lastestEpisodes = episodes.slice(0, 2);
+  const latestEpisodes = episodes.slice(0, 2);
   const allEpisodes = episodes.slice(2, episodes.length);
 
   return {
     props: {
-      lastestEpisodes,
-      allEpisodes
+      latestEpisodes,
+      allEpisodes,
     },
-    revalidate: 60 * 68 * 8,
+    revalidate: 60 * 60 * 8,
   }
-
 }
