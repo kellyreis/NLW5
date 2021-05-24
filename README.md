@@ -16,11 +16,6 @@
 
 ## Tecnologies
 
-<div align="center">
-  <br />
-  <img src=".github/tech-logos.png" alt="Technologies used">
-</div>
-
 This project was developed using cutting edge front-end technologies.
 
 
@@ -61,4 +56,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Made with 💜 by Joseph Oliveira 👋 [Check out my LinkedIn](https://www.linkedin.com/in/joseph-oliveira-294a19165)
+Made with 💜 by Kelly Reis 👋 [Check out my LinkedIn](https://www.linkedin.com/in/keellyreis/)
