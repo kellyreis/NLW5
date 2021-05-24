@@ -1,6 +1,3 @@
-<div align="center">
-  <img src=".github/podcastr-logo.svg" alt="Podcastr logo">
-</div>
 
 ## Podcastr
 
@@ -12,7 +9,6 @@
   Podcastr is a platform built for podcast broadcasting.
 </h4>
 
-![Podcastr preview](.github/app-preview.png)
 
 ## Tecnologies
 
